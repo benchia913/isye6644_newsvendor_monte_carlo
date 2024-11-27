@@ -92,7 +92,41 @@ class NewsVendorData():
             return (gross_profit - overage_cost - underage_cost)
         
         self.profit_loss = helper_compute_profit_loss(self.sample_demand)
+
     
+    def simulate_order_quantity(self):
+        '''
+        This method simulates and collects average PnL across all iterations at different order 
+        quantities. 
+        '''
+
+        if self.input_params['demand_dist_type'] == 'Uniform':
+            # simulate min to max
+            min_order_qty = int(self.input_params['demand_unif_min'])
+            max_order_qty = int(self.input_params['demand_unif_max'])
+
+        if self.input_params['demand_dist_type'] == 'Normal':
+            # simulate plus minus 2 SDs
+            min_order_qty = \
+                int(self.input_params['demand_norm_mean'] - 2 * self.input_params['demand_norm_sd']) 
+            max_order_qty = \
+                int(self.input_params['demand_norm_mean'] + 2 * self.input_params['demand_norm_sd'])
+            
+
+        self.test_order_quantities = list(range(min_order_qty, 
+                                                max_order_qty + 1, 
+                                                1)
+                                        )
+        
+        self.test_average_pnl = []
+        
+        for order_qty in self.test_order_quantities:
+            self.input_params['order_quantity'] = order_qty
+            self.compute_profit_loss()
+
+        
+            
+
 
 
 
