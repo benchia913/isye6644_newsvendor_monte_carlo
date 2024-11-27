@@ -12,10 +12,13 @@ from core import NewsVendorData
 # ASSUMPTIONS #
 ###############
 
-
-
-
-
+# 1. This project will only explore Montel Carlo simulation on the case of demand being 
+# modelled as a uniform distribution with known parameters and normal distribution with 
+# know parameters
+# 2. Allow occurence of negative values for demands, particularly for normal distribution at large
+# values of sigma which produces significant proportion of negative demand. 
+# 3. Application will assume single period inventory model, without carry over/holding of inventory from 
+# one day to the next / goods are perishable
 
 ###########
 # MAIN UI #
