@@ -10,7 +10,10 @@ CONTAINER_LAYOUT = Layout(border='solid 2px',
                           padding='10px 10px 10px 10px'
                           )
 
+BUTTON_LAYOUT = Layout(width='25%')
+
 OUTPUT_LOGS_LAYOUT = Layout(width='100%',
-                            height='250px', 
+                            height='600px', 
                             border='solid 1px',
                             flex_flow='row wrap')
+

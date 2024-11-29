@@ -1,6 +1,8 @@
 # This file holds the core data object
 
 import numpy as np
+from scipy.stats import norm
+import math
 
 class NewsVendorData():
 
@@ -13,8 +15,6 @@ class NewsVendorData():
              'demand_unif_max': None, 
              'demand_norm_mean': None, 
              'demand_norm_sd': None, 
-            #  'demand_lognorm_mean': None, 
-            #  'demand_lognorm_sd': None, 
              'unit_cost': None, 
              'unit_sale_price': None, 
              'unit_salvage_value': None, 
@@ -42,6 +42,19 @@ class NewsVendorData():
         except:
             self.critical_fractile = None
 
+        if self.input_params['demand_dist_type'] == 'Uniform':
+            self.critical_fractile_order_qty = \
+                self.input_params['demand_unif_min'] \
+                + (self.input_params['demand_unif_max'] - self.input_params['demand_unif_min']) \
+                * self.critical_fractile
+            
+        if self.input_params['demand_dist_type'] == 'Normal':
+            self.critical_fractile_order_qty = \
+                self.input_params['demand_norm_mean'] \
+                + norm.ppf(self.critical_fractile) * self.input_params['demand_norm_sd']
+            
+        self.critical_fractile_order_qty = math.ceil(self.critical_fractile_order_qty)
+
     def generate_demand(self):
         '''
         This method generates a random sample from a normal distribution with mean of demand_mean
@@ -60,14 +73,7 @@ class NewsVendorData():
             self.sample_demand = np.random.normal(loc=self.input_params['demand_norm_mean'],
                                                 scale=self.input_params['demand_norm_sd'],
                                                 size=self.input_params['num_iterations']
-                                                )
-            
-        # if self.input_params['demand_dist_type'] == 'Lognormal':
-        #     self.sample_demand = np.random.lognormal(mean=self.input_params['demand_lognorm_mean'],
-        #                                             sigma=self.input_params['demand_lognorm_sd'],
-        #                                             size=self.input_params['num_iterations']
-        #                                             )
-            
+                                                )            
         
     def compute_profit_loss(self):
         '''
@@ -106,11 +112,11 @@ class NewsVendorData():
             max_order_qty = int(self.input_params['demand_unif_max'])
 
         if self.input_params['demand_dist_type'] == 'Normal':
-            # simulate plus minus 2 SDs
+            # simulate plus minus 3 SDs
             min_order_qty = \
-                int(self.input_params['demand_norm_mean'] - 2 * self.input_params['demand_norm_sd']) 
+                int(self.input_params['demand_norm_mean'] - 3 * self.input_params['demand_norm_sd']) 
             max_order_qty = \
-                int(self.input_params['demand_norm_mean'] + 2 * self.input_params['demand_norm_sd'])
+                int(self.input_params['demand_norm_mean'] + 3 * self.input_params['demand_norm_sd'])
             
 
         self.test_order_quantities = list(range(min_order_qty, 
@@ -118,11 +124,21 @@ class NewsVendorData():
                                                 1)
                                         )
         
+        # store original order quantity before iteration start
+        temp_order_qty = self.input_params['order_quantity']
+        
         self.test_average_pnl = []
         
         for order_qty in self.test_order_quantities:
             self.input_params['order_quantity'] = order_qty
             self.compute_profit_loss()
+            self.test_average_pnl.append(np.average(self.profit_loss))
+
+        # restore original order quantity in widget and 
+        self.input_params['order_quantity'] = temp_order_qty
+        self.compute_profit_loss()
+
+        
 
         
             
