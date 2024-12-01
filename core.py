@@ -147,8 +147,15 @@ class NewsVendorData():
 
 
 
-        
-        
+
+
+##############
+# REFERENCES #
+##############
+# introduction to newsvendor problem - https://www.columbia.edu/~gmg2/4000/pdf/lect_07.pdf   
+# wiki page newsvendor problemn - https://en.wikipedia.org/wiki/Newsvendor_model  
+# approaches to negative numbers - https://ideas.repec.org/p/pra/mprapa/31842.html  
+# Monte Carlo implementation -  chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://dc.etsu.edu/cgi/viewcontent.cgi?article=4522&context=etd
 
 
 
