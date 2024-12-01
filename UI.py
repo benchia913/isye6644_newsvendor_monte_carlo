@@ -21,12 +21,14 @@ w_header_app = ipw.HTML(
 <b>Instructions:</b><br>
 1. Input parameters.<br>
 2. Use any of the following buttons to perform their respective functions:<br>
---> <b>'Generate and Plot Demand':</b> Generates sample demand and plots probability distrbition.<br>
---> <b>'Calculate and Plot P&L':</b> Based on sample demand generated, calculates profit (less overage 
+--> <b>Generate and Plot Demand:</b> Generates sample demand and plots probability distrbition.<br>
+--> <b>Calculate and Plot P&L:</b> Based on sample demand generated, calculates profit (less overage 
 and underage costs) based on given 'Order Quantity'<br>
---> <b>'Find Optimal Order Quantity':</b> Simulates and calculates average profit for different order 
+--> <b>Find Optimal Order Quantity:</b> Simulates and calculates average profit for different order 
 quantities to find the optimal order quantity.<br>
-3. View output in the Output Logs section and use 'Clear Output' button to clear output area.<br>
+--> <b>Clear Output Area:</b> Used to clear output area.<br>
+3. View output in the Output Area section and use 'Clear Output' button to clear output area.<br>
+<i><b>Note:</b> Parameter values keyed into widgets are reloaded at each button push.</i>
 <br>
 <b>Assumptions</b><br>
 1. Assume demand distribution parameters are known.<br>
@@ -41,10 +43,14 @@ of each day.<br>
 
 # input widgets
 
-# input box 1 - Random Variable Generation
+w_header_control_area = ipw.HTML(
+    value='<b><u>Control Panel / Input Parameters</u></b>'
+)
+
+# input box 1 - Run Setup
 
 w_header_rv_gen = ipw.HTML(
-    value='<b><u>Random Variable Generation</u></b>'
+    value='<b><u>Run Setup</u></b>'
 )
 
 w_random_seed = ipw.IntText(
@@ -165,12 +171,12 @@ w_order_quantity = ipw.IntText(
     layout=INT_TEXT_LAYOUT
 )
 
-# output logs
-w_output_logs_header = ipw.HTML(
-    value='<b><u>Output Logs:</b></u>'
+# output section
+w_output_area_header = ipw.HTML(
+    value='<b><u>Output Area:</b></u>'
 )
 
-w_output_logs = ipw.Output()
+w_output_area = ipw.Output()
 
 
 
@@ -184,7 +190,7 @@ news_vendor_data_object = NewsVendorData()
 # update demand distribution input widgets based on distribution selected
 def on_change_demand_dist_widgets(change):
     if change['type'] == 'change' and change['name'] == 'value': 
-        w_main_UI.children[1].children[1].children \
+        w_main_UI.children[2].children[1].children \
         = [w_header_demand_dist, w_demand_distribution_type] \
         + demand_dist_handler_dict[w_demand_distribution_type.value]
 
@@ -214,7 +220,7 @@ def load_params():
     )
 
     # show params successfully loaded
-    with w_output_logs:
+    with w_output_area:
         print('Running with the following input params:')
         pprint(news_vendor_data_object.input_params)
         print('\n')
@@ -254,6 +260,12 @@ def click_w_generate_and_plot_demand(button):
                     )
         ax.plot(x, y)
 
+        plt.title(f'PDF of Daily Demand, \
+n = {news_vendor_data_object.input_params['num_iterations']}, \
+\nDaily Demand ~ Uniform(\
+{news_vendor_data_object.input_params['demand_unif_min']}, \
+{news_vendor_data_object.input_params['demand_unif_max']})')
+
     if news_vendor_data_object.input_params['demand_dist_type'] == 'Normal':           
         xmin, xmax = plt.xlim()
         x = np.linspace(xmin, xmax, 1000)
@@ -261,7 +273,16 @@ def click_w_generate_and_plot_demand(button):
         y = norm.pdf(x, mu, std)
         ax.plot(x, y)
 
-    with w_output_logs:
+        plt.title(f'PDF of Daily Demand, \
+n = {news_vendor_data_object.input_params['num_iterations']}, \
+\nDaily Demand ~ Normal(\
+{news_vendor_data_object.input_params['demand_norm_mean']}, \
+{news_vendor_data_object.input_params['demand_norm_sd']}\u00b2)')
+    
+    ax.set_xlabel('Daily Demand (units)')
+    ax.set_ylabel('Probability')
+
+    with w_output_area:
         plt.show()
 
 w_generate_and_plot_demand_button.on_click(click_w_generate_and_plot_demand)
@@ -291,7 +312,26 @@ def click_w_generate_and_plot_pnl_button(button):
             bins=num_bins, 
             density=True)
     
-    with w_output_logs:
+    if news_vendor_data_object.input_params['demand_dist_type'] == 'Uniform': 
+        plt.title(f'PDF of Profit, \
+n = {news_vendor_data_object.input_params['num_iterations']}, \
+Order Quantity = {news_vendor_data_object.input_params['order_quantity']}, \
+\nDaily Demand ~ Uniform(\
+{news_vendor_data_object.input_params['demand_unif_min']}, \
+{news_vendor_data_object.input_params['demand_unif_max']})')
+    
+    if news_vendor_data_object.input_params['demand_dist_type'] == 'Normal': 
+        plt.title(f'PDF of Profit, \
+n = {news_vendor_data_object.input_params['num_iterations']}, \
+Order Quantity = {news_vendor_data_object.input_params['order_quantity']}, \
+\nDaily Demand ~ Normal(\
+{news_vendor_data_object.input_params['demand_norm_mean']}, \
+{news_vendor_data_object.input_params['demand_norm_sd']}\u00b2)')
+
+    ax.set_xlabel('Daily Profit ($)')
+    ax.set_ylabel('Probability')
+    
+    with w_output_area:
         plt.show()
         # print expected PnL
         average_pnl = np.average(news_vendor_data_object.profit_loss)
@@ -336,7 +376,7 @@ def click_w_find_optimal_order_qty_button(button):
 
     plt.ylim(ymin, ymax * 1.3)
 
-    ax.annotate(f'Optimal order quantity: ({xmax} units, ${round(ymax, 0)})', 
+    ax.annotate(f'Monte Carlo optimal order qty: ({xmax} units, ${round(ymax, 0)})', 
                 xy=(xmax, ymax), 
                 xytext=(xmax, ymax * 1.2), 
                 arrowprops=dict(facecolor='black', 
@@ -346,7 +386,7 @@ def click_w_find_optimal_order_qty_button(button):
                           ec='k'))
     
     # annotate critical fractile theoretical optimal order quantity
-    ax.annotate(f'Critical fractile implied: ({cf_x} units, ${round(cf_y, 0)})', 
+    ax.annotate(f'Critical fractile optimal order qty: ({cf_x} units, ${round(cf_y, 0)})', 
                 xy=(cf_x, cf_y), 
                 xytext=(cf_x, cf_y * 0.8), 
                 arrowprops=dict(facecolor='black', 
@@ -355,20 +395,38 @@ def click_w_find_optimal_order_qty_button(button):
                           fc='w', 
                           ec='k'))
     
-    with w_output_logs:        
+    if news_vendor_data_object.input_params['demand_dist_type'] == 'Uniform': 
+        plt.title(f'Plot of Average Profit against Order Quantity, \
+\nn = {news_vendor_data_object.input_params['num_iterations']}, \
+\nDaily Demand ~ Uniform(\
+{news_vendor_data_object.input_params['demand_unif_min']}, \
+{news_vendor_data_object.input_params['demand_unif_max']})')
+    
+    if news_vendor_data_object.input_params['demand_dist_type'] == 'Normal':     
+        plt.title(f'Plot of Average Profit against Order Quantity, \
+\nn = {news_vendor_data_object.input_params['num_iterations']}, \
+\nDaily Demand ~ Normal(\
+{news_vendor_data_object.input_params['demand_norm_mean']}, \
+{news_vendor_data_object.input_params['demand_norm_sd']}\u00b2)')
+
+    ax.set_xlabel('Order Quantity')
+    ax.set_ylabel('Average Profit (across all simulations of daily demand, $)')
+    
+    with w_output_area:        
         plt.show()
 
 w_find_optimal_order_qty_button.on_click(click_w_find_optimal_order_qty_button)
 
-# button to clear output logs
+# button to clear output area
 
-w_clear_output_logs_button = ipw.Button(description='Clear Output',
-                                        button_style='warning')
+w_clear_output_area_button = ipw.Button(description='Clear Output Area',
+                                        button_style='warning', 
+                                        layout=BUTTON_LAYOUT)
 
-def click_w_clear_output_logs_button(button):
-    w_output_logs.clear_output()
+def click_w_clear_output_area_button(button):
+    w_output_area.clear_output()
     
-w_clear_output_logs_button.on_click(click_w_clear_output_logs_button)
+w_clear_output_area_button.on_click(click_w_clear_output_area_button)
 
 
 
@@ -379,6 +437,7 @@ w_clear_output_logs_button.on_click(click_w_clear_output_logs_button)
 
 w_main_UI = ipw.VBox([
                 w_header_app, 
+                w_header_control_area, 
                 ipw.HBox([
                     ipw.VBox([w_header_rv_gen, 
                               w_random_seed, w_num_iterations, ], 
@@ -395,13 +454,13 @@ w_main_UI = ipw.VBox([
                         ]), 
                 ipw.HBox([w_generate_and_plot_demand_button, 
                           w_generate_and_plot_pnl_button, 
-                          w_find_optimal_order_qty_button]),
+                          w_find_optimal_order_qty_button, 
+                          w_clear_output_area_button]),
                 ipw.VBox([
-                    w_output_logs_header, 
-                    ipw.VBox([w_output_logs],
+                    w_output_area_header, 
+                    ipw.VBox([w_output_area],
                              layout=OUTPUT_LOGS_LAYOUT
-                            ), 
-                    w_clear_output_logs_button
+                            )
                         ],  
                     layout=CONTAINER_LAYOUT)
                     ])
