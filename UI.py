@@ -28,14 +28,16 @@ and underage costs) based on given 'Order Quantity'<br>
 quantities to find the optimal order quantity.<br>
 --> <b>Clear Output Area:</b> Used to clear output area.<br>
 3. View output in the Output Area section and use 'Clear Output' button to clear output area.<br>
-<i><b>Note:</b> Parameter values keyed into widgets are reloaded at each button push.</i>
+<i><b>Note:</b> Parameter values keyed into widgets are reloaded at each button push. For example, if the 
+user hits 'Generate and Plot Demand', changes the input in Demand Distribution section, then hits the 
+'Calculate and Plot P&L' button, the demand is resampled based on the updated input (incl. provided random 
+seed) and P&L is calculated with that new sample demand. </i>
 <br>
 <b>Assumptions</b><br>
 1. Assume demand distribution parameters are known.<br>
 2. Allow occurence of negative values for demand. No truncation at 0 or resampling of demand for negative 
 demands.<br>
-3. Assume single period inventory model, where goods are perishable and salvaged/disposed of at the end 
-of each day.<br>
+3. Assume single period inventory model, where goods are salvaged of at the end of each day.<br>
 <br>
 '''
 )
