@@ -4,6 +4,7 @@ The application is prepared as a Jupyter notebook containing the main UI generat
 2. Install dependecies in requirements.txt (either into local environment or a created virtual environment)  
 3. Run main UI in main.ipynb using a Python3 kernel. Development was done using Pythgon 3.12.7
 4. The entry point of the tool is in main.ipynb, simply run all cells to generate the main UI. Restart the kernel as required to reset the state  
+Note: If the cell runs but UI is not shown, try closing and relaunching your IDE.  
   
 ## Description of Application  
 This tool was created to run Monte Carlo simulations for a single period newsvendor problem, allowiong the user to determine the optimal order quantity using simulation 
